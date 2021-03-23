@@ -250,21 +250,10 @@ class OnlineBankStatementProviderPonto(models.Model):
             raise UserError(
                 _('Ponto : wrong configuration, unknow account %s')
                 % journal.bank_account_id.acc_number)
-        #
-        #Add function to collect ending balance
-        #
-        self._ponto_synchronisation_account_details(account_id, 'accountDetails')
-        balance_end_real = self._ponto_get_account_endind_balance(
-            account_id, date_since, date_until)
-        #
         self._ponto_synchronisation(account_id)
         transaction_lines = self._ponto_get_transaction(
             account_id, date_since, date_until)
         new_transactions = []
-        #
-        #Add variable balance_start that will be compute with transaction_lines
-        #
-        balance_start = balance_end_real
         sequence = 0
         for transaction in transaction_lines:
             sequence += 1
@@ -284,18 +273,21 @@ class OnlineBankStatementProviderPonto(models.Model):
                 'unique_import_id': transaction['id'],
                 'amount': attributes['amount'],
             }
-            #
-            #Compute balance start from balance_end_real and transaction amount
-            #
-            balance_start -= attributes['amount']
             if attributes.get("counterpartReference"):
                 vals_line["account_number"] = attributes["counterpartReference"]
             if attributes.get("counterpartName"):
                 vals_line["partner_name"] = attributes["counterpartName"]
             new_transactions.append(vals_line)
         if new_transactions:
+            #
+            #Add function to collect ending balance
+            #
+            self._ponto_synchronisation_account_details(account_id, 'accountDetails')
+            balance_end_real = self._ponto_get_account_endind_balance(
+                account_id, date_since, date_until)
+            #
             new_transactions.append({
             'balance_end_real': balance_end_real,
-            'balance_start': balance_start})
+            })
             return new_transactions, {}
         return
