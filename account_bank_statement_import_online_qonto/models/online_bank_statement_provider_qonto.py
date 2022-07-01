@@ -9,7 +9,7 @@ from odoo import api, models, _
 from odoo.exceptions import UserError
 from odoo.addons.base.models.res_bank import sanitize_account_number
 
-QONTO_ENDPOINT = 'https://thirdparty.qonto.eu/v2'
+QONTO_ENDPOINT = 'https://thirdparty.qonto.com/v2'
 
 
 class OnlineBankStatementProviderQonto(models.Model):
@@ -18,7 +18,7 @@ class OnlineBankStatementProviderQonto(models.Model):
     @api.model
     def _get_available_services(self):
         return super()._get_available_services() + [
-            ('qonto', 'Qonto.eu'),
+            ('qonto', 'Qonto.com'),
         ]
 
     def _obtain_statement_data(self, date_since, date_until):
